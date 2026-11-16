@@ -1,15 +1,15 @@
 
 package com.internship;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 @WebServlet("/feedback")
 public class FeedbackServlet extends HttpServlet {
@@ -28,9 +28,7 @@ public class FeedbackServlet extends HttpServlet {
         String email = request.getParameter("email");
         String message = request.getParameter("message");
 
-        if (name == null || name.isBlank()
-                || email == null || email.isBlank()
-                || message == null || message.isBlank()) {
+      if (!FeedbackValidator.isValid(name, email, message)) {
 
             response.sendError(
                     HttpServletResponse.SC_BAD_REQUEST,
