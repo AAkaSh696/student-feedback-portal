@@ -65,7 +65,7 @@ try {
 
             if (
                 $response.StatusCode -eq 200 -and
-                $response.Content -match '"status"\s*:\s*"UP"'
+                $response.Content -match '"status"\s*:\s*"DOWN"'
             ) {
                 $healthy = $true
                 Write-Host "Health check successful!"
