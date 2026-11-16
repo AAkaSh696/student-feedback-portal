@@ -1,4 +1,3 @@
-
 pipeline {
     agent any
 
@@ -40,19 +39,32 @@ pipeline {
         stage('Archive') {
             steps {
                 echo 'Archiving WAR artifact...'
+
                 archiveArtifacts artifacts: 'target/student-feedback-portal.war',
                                  fingerprint: true
+            }
+        }
+
+        stage('Deploy to Tomcat') {
+            steps {
+                echo 'Deploying WAR to Tomcat...'
+
+                bat '''
+                    copy /Y "target\\student-feedback-portal.war" "D:\\apache-tomcat-9.0.122\\webapps\\student-feedback-portal.war"
+                '''
+
+                echo 'WAR copied to Tomcat webapps directory.'
             }
         }
     }
 
     post {
         success {
-            echo 'CI Pipeline completed successfully!'
+            echo 'CI/CD Pipeline completed successfully!'
         }
 
         failure {
-            echo 'CI Pipeline failed. Check the console output.'
+            echo 'Pipeline failed. Check the console output.'
         }
     }
 }
