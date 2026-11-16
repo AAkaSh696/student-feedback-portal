@@ -1,3 +1,4 @@
+
 pipeline {
     agent any
 
@@ -24,14 +25,14 @@ pipeline {
 
         stage('Test') {
             steps {
-                echo 'Running unit tests...'
+                echo 'Running JUnit tests...'
                 bat 'mvn test'
             }
         }
 
         stage('Package') {
             steps {
-                echo 'Creating WAR file...'
+                echo 'Generating WAR file...'
                 bat 'mvn package -DskipTests'
             }
         }
@@ -40,31 +41,38 @@ pipeline {
             steps {
                 echo 'Archiving WAR artifact...'
 
-                archiveArtifacts artifacts: 'target/student-feedback-portal.war',
-                                 fingerprint: true
+                archiveArtifacts(
+                    artifacts: 'target/student-feedback-portal.war',
+                    fingerprint: true
+                )
             }
         }
 
-        stage('Deploy to Tomcat') {
+        stage('Deploy and Health Check') {
             steps {
-                echo 'Deploying WAR to Tomcat...'
+                echo 'Deploying application to Tomcat...'
 
                 bat '''
-                    copy /Y "target\\student-feedback-portal.war" "D:\\apache-tomcat-9.0.122\\webapps\\student-feedback-portal.war"
+                    powershell.exe -NoProfile -ExecutionPolicy Bypass -File "scripts\\deploy-and-verify.ps1"
                 '''
-
-                echo 'WAR copied to Tomcat webapps directory.'
             }
         }
     }
 
     post {
+        always {
+            junit(
+                testResults: 'target/surefire-reports/*.xml',
+                allowEmptyResults: true
+            )
+        }
+
         success {
             echo 'CI/CD Pipeline completed successfully!'
         }
 
         failure {
-            echo 'Pipeline failed. Check the console output.'
+            echo 'CI/CD Pipeline failed. Check the console output.'
         }
     }
 }
